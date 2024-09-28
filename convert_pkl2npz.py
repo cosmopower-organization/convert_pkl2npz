@@ -9,50 +9,53 @@
 # Inputs are name of the pkl file to convert, and whether pca was used or not.
 # NOTE: if you want to use `filepath` with TF>=2.14, make sure you adapt this script
 # so that you have the .npz dictionary in your `filepath` folder.
-
 import numpy as np
 import pickle
-import sys, ast
+import sys, ast, os
 
-# specify the pickle filename in trained_models without .pkl extension,
-# either by passing it as first argument or hardcoding it here
-try:
-    pkl_filename = sys.argv[1]
-except:
-    print('Pickle filename not passed as input, so falling back to file already in trained models')
-    pkl_filename = 'tf_cmb_template' # this is one of the SPT models available from CP
+def convert_pkl_to_npz(pkl_filepath, pca=False):
+    # Load the pickle file
+    with open(pkl_filepath, 'rb') as f:
+        pickle_file = pickle.load(f)
 
-# also select if PCA was used, as in that case the file had a different structure
-try:
-    pca = ast.literal_eval(sys.argv[2])
-except:
-    # if nothing is given as input, just assume no pca is needed
-    print('No PCA flag specified, will assume the pkl file had no PCA involved')
-    pca = False 
+    # Select the variable names based on PCA flag
+    if pca:
+        variable_names = ['weights_', 'biases_', 'alphas_', 'betas_', \
+                          'param_train_mean', 'param_train_std', \
+                          'feature_train_mean', 'feature_train_std', \
+                          'training_mean', 'training_std', \
+                          'parameters', 'n_parameters', \
+                          'modes', 'n_modes', \
+                          'n_pcas', 'pca_matrix', \
+                          'n_hidden', 'n_layers', 'architecture']
+    else:
+        variable_names = ['weights_', 'biases_', 'alphas_', 'betas_', \
+                          'param_train_mean', 'param_train_std', \
+                          'feature_train_mean', 'feature_train_std', \
+                          'n_parameters', 'parameters', \
+                          'n_modes', 'modes', \
+                          'n_hidden', 'n_layers', 'architecture']
 
-with open(f'./cosmopower_jax/trained_models/{pkl_filename}.pkl', 'rb') as f:
-      pickle_file = pickle.load(f)
+    # Check if the number of variables is consistent with the pickle file
+    assert len(variable_names) == len(pickle_file), \
+        "Length of loaded variables is inconsistent, make sure the PCA flag is used only if loading a PCA model"
 
-# you can change the list of variable names below in case your model is different
-if pca:
-    variable_names = ['weights_', 'biases_', 'alphas_', 'betas_', \
-                      'param_train_mean', 'param_train_std', \
-                      'feature_train_mean', 'feature_train_std', \
-                      'training_mean', 'training_std', \
-                      'parameters', 'n_parameters', \
-                      'modes', 'n_modes', \
-                      'n_pcas', 'pca_matrix', \
-                      'n_hidden', 'n_layers', 'architecture']
-else:
-    variable_names = ['weights_', 'biases_', 'alphas_', 'betas_', \
-                  'param_train_mean', 'param_train_std', \
-                  'feature_train_mean', 'feature_train_std', \
-                  'n_parameters', 'parameters', \
-                  'n_modes', 'modes', \
-                  'n_hidden', 'n_layers', 'architecture']
+    # Create the new dictionary
+    new_dict = {name: value for name, value in zip(variable_names, pickle_file)}
 
-# check that the correct variables are being saved
-assert len(variable_names) == len(pickle_file), "Length of loaded variables is inconsistent, make sure the PCA flag is used only if loading a PCA model"
-# create the new dictionary, and save it with the same name (but different extension)
-new_dict = {name: value for name, value in zip(variable_names, pickle_file)}
-np.savez(f'./cosmopower_jax/trained_models/{pkl_filename}', new_dict)
+    # Save as .npz file in the same directory
+    npz_filepath = pkl_filepath.replace('.pkl', '.npz')
+    np.savez(npz_filepath, new_dict)
+    print(f"Converted {pkl_filepath} to {npz_filepath}")
+
+if __name__ == "__main__":
+    # Expecting 2 arguments: pkl file path and PCA flag
+    if len(sys.argv) < 2:
+        print("Usage: python convert_pkl2npz.py <pkl_file> [pca_flag]")
+        sys.exit(1)
+
+    pkl_filepath = sys.argv[1]
+    pca = ast.literal_eval(sys.argv[2]) if len(sys.argv) > 2 else False
+
+    convert_pkl_to_npz(pkl_filepath, pca)
+
