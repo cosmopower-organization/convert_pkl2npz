@@ -22,11 +22,11 @@ def convert_pkl_to_npz(pkl_filepath, pca=False):
     if pca:
         variable_names = ['weights_', 'biases_', 'alphas_', 'betas_', \
                           'param_train_mean', 'param_train_std', \
+                          'pca_mean', 'pca_std', \
                           'feature_train_mean', 'feature_train_std', \
-                          'training_mean', 'training_std', \
                           'parameters', 'n_parameters', \
                           'modes', 'n_modes', \
-                          'n_pcas', 'pca_matrix', \
+                          'n_pcas', 'pca_transform_matrix', \
                           'n_hidden', 'n_layers', 'architecture']
     else:
         variable_names = ['weights_', 'biases_', 'alphas_', 'betas_', \
