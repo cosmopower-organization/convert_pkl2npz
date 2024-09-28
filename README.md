@@ -37,4 +37,4 @@ Note that the error message:
 ModuleNotFoundError: No module named 'tensorflow.python.training.tracking'
 ```
 
-may appear if a tensorflow verion >2.14 is loaded in your environment. 
+may appear if a tensorflow verion >2.14 is loaded in your environment. In this case, make sure you execute this script in an environment withour tensorflow. 
