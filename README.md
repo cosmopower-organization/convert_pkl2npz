@@ -1,7 +1,5 @@
 # convert_pkl2npz
 
-## Instructions to Convert `.pkl` Files to `.npz` Format
-
 Follow these steps to convert all `.pkl` files in the `cosmopower-organization` directory to `.npz` format using the provided Python and shell scripts.
 
 ### Steps
@@ -31,3 +29,12 @@ Follow these steps to convert all `.pkl` files in the `cosmopower-organization` 
    ```
 
 This will automatically convert all `.pkl` files to `.npz` files. Note that for the TE models, the script will apply PCA as specified.
+
+
+Note that the error message: 
+
+```
+ModuleNotFoundError: No module named 'tensorflow.python.training.tracking'
+```
+
+may appear if a tensorflow verion >2.14 is loaded in your environment. 
